@@ -1,10 +1,4 @@
-import {
-    BellIcon,
-    CreditCardIcon,
-    LogOutIcon,
-    MoreVerticalIcon,
-    UserCircleIcon,
-} from 'lucide-react';
+import { LogOutIcon, MoreVerticalIcon, UserCircleIcon } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/Components/ui/avatar';
 import {
@@ -93,28 +87,33 @@ export function NavUser({
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
-                            <DropdownMenuItem>
-                                <UserCircleIcon />
-                                Account
+                            <DropdownMenuItem
+                              onSelect={(e) => {
+                                e.preventDefault();
+                                window.location.href = route('profile.edit');
+                              }}
+                            >
+                              <UserCircleIcon />
+                              Account
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            {/* <DropdownMenuItem>
                                 <CreditCardIcon />
                                 Billing
                             </DropdownMenuItem>
                             <DropdownMenuItem>
                                 <BellIcon />
                                 Notifications
-                            </DropdownMenuItem>
+                            </DropdownMenuItem> */}
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          onSelect={(e) => {
-                            e.preventDefault(); // hindari menu tertutup sebelum action
-                            post(route('logout')); // ini akan kirim POST ke /logout
-                        }}
+                            onSelect={(e) => {
+                                e.preventDefault(); 
+                                post(route('logout'));
+                            }}
                         >
-                          <LogOutIcon />
-                          Log out
+                            <LogOutIcon />
+                            Log out
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
