@@ -1,4 +1,4 @@
-# Nama Proyek
+# TBC-CRUD with photo
 
 Repositori ini menggunakan Laravel dengan Laravel Breeze, Inertia.js, dan React sebagai stack frontend-nya.
 
