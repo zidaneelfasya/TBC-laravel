@@ -26,6 +26,7 @@ Sebelum menjalankan proyek ini, pastikan kamu sudah menginstal:
 ```bash
 git clone https://github.com/username/nama-repositori.git
 cd nama-repositori
+```
   
 2. **Install dependensi PHP dengan Composer**
 
