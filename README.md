@@ -31,24 +31,18 @@ cd nama-repositori
 2. **Install dependensi PHP dengan Composer**
 
 ```bash
-Salin
-Edit
 composer install
 ```
 
 3. **Copy file .env dan atur konfigurasi**
 
 ```bash
-Salin
-Edit
 cp .env.example .env
 ```
 
 **Edit .env sesuai dengan konfigurasi database kamu:**
 
 ```ini
-Salin
-Edit
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -60,16 +54,12 @@ DB_PASSWORD=password_database
 4. **Generate aplikasi key**
 
 ```bash
-Salin
-Edit
 php artisan key:generate
 ```
 
 5. **Jalankan migrasi database**
 
 ```bash
-Salin
-Edit
 php artisan migrate
 ```
 
@@ -82,8 +72,6 @@ npm run dev
 7. **Jalankan server Laravel**
 
 ```bash
-Salin
-Edit
 php artisan serve
 ```
 
@@ -104,7 +92,5 @@ Kontribusi
 Pull request sangat diterima! Untuk perubahan besar, harap buka issue terlebih dahulu untuk mendiskusikan apa yang ingin kamu ubah.
 
 java
-Salin
-Edit
 
 Kalau kamu punya nama proyek dan deskripsi spesifik atau tambahan seperti bad
