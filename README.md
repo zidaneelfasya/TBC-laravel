@@ -23,9 +23,9 @@ Sebelum menjalankan proyek ini, pastikan kamu sudah menginstal:
 ## Langkah Instalasi
 
 1. **Clone repositori**
-   ```bash
-   git clone https://github.com/username/nama-repositori.git
-   cd nama-repositori
+```bash
+git clone https://github.com/username/nama-repositori.git
+cd nama-repositori
   
 2. **Install dependensi PHP dengan Composer**
 
