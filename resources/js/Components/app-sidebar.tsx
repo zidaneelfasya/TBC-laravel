@@ -10,10 +10,12 @@ import {
   FileTextIcon,
   FolderIcon,
   HelpCircleIcon,
+  Images,
   LayoutDashboardIcon,
   ListIcon,
   SearchIcon,
   SettingsIcon,
+  University,
   UsersIcon,
 } from "lucide-react"
 
@@ -41,13 +43,13 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/admin/dashboard",
       icon: LayoutDashboardIcon,
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: ListIcon,
+      title: "Images",
+      url: "/admin/images",
+      icon: Images,
     },
     {
       title: "Analytics",
@@ -162,8 +164,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="#">
-                <ArrowUpCircleIcon className="h-5 w-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <University className="h-5 w-5" />
+                <span className="text-base font-semibold">TBC ACA</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

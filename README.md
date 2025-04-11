@@ -24,8 +24,8 @@ Sebelum menjalankan proyek ini, pastikan kamu sudah menginstal:
 
 1. **Clone repositori**
 ```bash
-git clone https://github.com/username/nama-repositori.git
-cd nama-repositori
+git clone https://github.com/zidaneelfasya/TBC-laravel.git
+cd TBC-laravel
 ```
   
 2. **Install dependensi PHP dengan Composer**
