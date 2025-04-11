@@ -20,5 +20,8 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => 'admin',
         ]);
+        // \App\Models\Photo::factory(50)->create();
+        \App\Models\Photo::factory(50)->create();
+
     }
 }
