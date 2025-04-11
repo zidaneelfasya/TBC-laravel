@@ -12,3 +12,18 @@ export type PageProps<
         user: User;
     };
 };
+
+import { User } from '@/types';
+
+declare module '@inertiajs/core' {
+  interface PageProps {
+    auth: {
+      user: User & {
+        role: string;
+      };
+    };
+    errors: {
+      error?: string;
+    };
+  }
+}
