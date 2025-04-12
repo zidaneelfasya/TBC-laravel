@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\UserMiddleware;
 use App\Models\User;
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -25,6 +28,8 @@ Route::get('/', function () {
 // Route::get('/admin/dashboard', function () {
 //     return Inertia::render('admin/dashboard');
 // })->middleware(['auth', 'verified'])->name('admin-dashboard')->middleware(AdminMiddleware::class);
+Route::post('/api/register', [RegisteredUserController::class, 'store']);
+
 
 Route::middleware(['auth', 'verified'])->middleware(UserMiddleware::class)->group(function () {
     Route::get('/dashboard', function () {
@@ -37,8 +42,15 @@ Route::middleware(['auth', 'verified'])->middleware(AdminMiddleware::class)->gro
         return Inertia::render('admin/dashboard');
     })->name('admin-dashboard'); 
     Route::get('/admin/images', function () {
-        return Inertia::render('admin/Images');
+        return Inertia::render('admin/images/Images');
     })->name('admin-Images'); 
+    Route::get('/admin/images/create', function () {
+        return Inertia::render('admin/images/Add');
+    })->name('admin-Images-add'); 
+    Route::post('/api/admin/photos', [PhotoController::class, 'store'])->name('admin-photos.store');
+    Route::get('/api/admin/photos', [PhotoController::class, 'index'])->name('admin-photos.index');
+
+    
 });
 
 Route::middleware('auth')->group(function () {
