@@ -190,6 +190,13 @@ const columns: ColumnDef<Photo>[] = [
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                    <Link
+                        href={route('admin-images-details', {
+                            id: row.original.id,
+                        })}
+                    >
+                        <DropdownMenuItem>Detail</DropdownMenuItem>
+                    </Link>
                     <DropdownMenuItem
                         onClick={() =>
                             navigator.clipboard.writeText(row.original.path)
@@ -197,6 +204,7 @@ const columns: ColumnDef<Photo>[] = [
                     >
                         Copy Path
                     </DropdownMenuItem>
+
                     <DropdownMenuItem>Download</DropdownMenuItem>
                     <DropdownMenuItem>Edit</DropdownMenuItem>
                     <DropdownMenuSeparator />

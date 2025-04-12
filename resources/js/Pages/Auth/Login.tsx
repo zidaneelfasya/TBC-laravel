@@ -90,7 +90,14 @@ export default function Login({
                     </label>
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
+                {/* <div className="mt-4 flex items-center justify-end"></div> */}
+                <div className="mt-4 flex justify-between">
+                    <Link
+                        href={route('register')}
+                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    >
+                        don't have an account?
+                    </Link>
                     {canResetPassword && (
                         <Link
                             href={route('password.request')}
@@ -100,10 +107,17 @@ export default function Login({
                         </Link>
                     )}
 
-                    <PrimaryButton className="ms-4" disabled={processing}>
+                   
+                </div>
+                <div className="flex items-center justify-end mt-4">
+                    <PrimaryButton
+                        className="ml-4"
+                        disabled={processing}
+                    >
                         Log in
                     </PrimaryButton>
                 </div>
+                
             </form>
         </GuestLayout>
     );

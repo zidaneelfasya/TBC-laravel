@@ -35,6 +35,17 @@ Route::middleware(['auth', 'verified'])->middleware(UserMiddleware::class)->grou
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard'); 
+    Route::get('/images/create', function () {
+        return Inertia::render('Add');
+    })->name('Images-add'); 
+    Route::get('/images/{id}', function () {
+        return Inertia::render('');
+    })->name('Images-add'); 
+    Route::get('/api/photos', [PhotoController::class, 'indexUser'])->name('photos.index');
+    Route::post('/api/photos', [PhotoController::class, 'store'])->name('photos.store');
+    Route::get('/api/images/{id}', [PhotoController::class, 'show'])->name('admin-photos.show');
+
+
 });
 
 Route::middleware(['auth', 'verified'])->middleware(AdminMiddleware::class)->group(function () {
@@ -47,8 +58,17 @@ Route::middleware(['auth', 'verified'])->middleware(AdminMiddleware::class)->gro
     Route::get('/admin/images/create', function () {
         return Inertia::render('admin/images/Add');
     })->name('admin-Images-add'); 
+    Route::get('/admin/images/{id}', function ($id) {
+        return Inertia::render('admin/images/Detail', [
+            'id' => $id
+        ]);
+    })->name('admin-images-details');
     Route::post('/api/admin/photos', [PhotoController::class, 'store'])->name('admin-photos.store');
     Route::get('/api/admin/photos', [PhotoController::class, 'index'])->name('admin-photos.index');
+    Route::get('/api/admin/photos/{id}', [PhotoController::class, 'show'])->name('admin-photos.show');
+
+    Route::put('/api/admin/photos/{id}', [PhotoController::class, 'update'])->name('admin-photos.update');
+    Route::delete('/api/admin/photos/{id}', [PhotoController::class, 'destroy'])->name('admin-photos.destroy');
 
     
 });
