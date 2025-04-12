@@ -28,9 +28,14 @@ class PhotoController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function indexUser()
     {
-        //
+        $photos = Photo::where('user_id', Auth::id())->get();
+        return response()->json([
+            'success' => true,
+            'message' => 'List of user photos',
+            'data' => $photos,
+        ], 200);
     }
 
     /**
@@ -52,6 +57,7 @@ class PhotoController extends Controller
             $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
             
             // Simpan file ke storage
+            
             $path = $file->storeAs('photos', $fileName, 'public');
             
             // Buat record photo di database
@@ -86,7 +92,18 @@ class PhotoController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $photo = Photo::find($id);
+        if (!$photo) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Photo not found',
+            ], 404);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Photo details',
+            'data' => $photo,
+        ], 200);
     }
 
     /**
