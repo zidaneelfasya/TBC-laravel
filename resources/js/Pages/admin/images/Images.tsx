@@ -29,7 +29,7 @@ export default function Page() {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
-                const response = await fetch('/api/admin/photos');
+                const response = await fetch('/api/photos/all');
                 const result = await response.json();
                 setData(result.data); // Make sure to access result.data
             } catch (error) {
