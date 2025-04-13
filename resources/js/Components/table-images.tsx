@@ -1,3 +1,5 @@
+import toast from 'react-hot-toast';
+
 import {
     DndContext,
     KeyboardSensor,
@@ -89,6 +91,12 @@ export const schema = z.object({
     mime_type: z.string(),
     created_at: z.string().datetime(),
     updated_at: z.string().datetime(),
+    user: z.object({
+        // Tambahkan ini
+        id: z.number(),
+        name: z.string(),
+        email: z.string(),
+    }),
 });
 
 type Photo = z.infer<typeof schema>;
@@ -112,110 +120,155 @@ function DragHandle({ id }: { id: number }) {
         </Button>
     );
 }
+const handleDownload = async (photo: Photo) => {
+    const toastId = toast.loading('Preparing download...');
+    try {
+        const response = await fetch(`/storage/${photo.path}`);
+        if (!response.ok) {
+            throw new Error('File not found');
+        }
 
-const columns: ColumnDef<Photo>[] = [
-    {
-        id: 'select',
-        header: ({ table }) => (
-            <Checkbox
-                checked={table.getIsAllPageRowsSelected()}
-                onCheckedChange={(value) =>
-                    table.toggleAllPageRowsSelected(!!value)
-                }
-                aria-label="Select all"
-            />
-        ),
-        cell: ({ row }) => (
-            <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(value) => row.toggleSelected(!!value)}
-                aria-label="Select row"
-            />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-    },
-    {
-        accessorKey: 'original_name',
-        header: 'File Name',
-        cell: ({ row }) => {
-            return (
-                <div className="flex items-center gap-2">
-                    <FileIcon type={row.original.mime_type} />
-                    <span>{row.original.original_name}</span>
-                </div>
-            );
-        },
-    },
-    {
-        accessorKey: 'description',
-        header: 'Description',
-        cell: ({ row }) => (
-            <div className="max-w-[200px] truncate">
-                {row.original.description || 'No description'}
-            </div>
-        ),
-    },
-    {
-        accessorKey: 'user_id',
-        header: 'Uploaded By',
-        cell: ({ row }) => <UserBadge userId={row.original.user_id} />,
-    },
-    {
-        accessorKey: 'size',
-        header: 'Size',
-        cell: ({ row }) => formatFileSize(row.original.size),
-    },
-    {
-        accessorKey: 'mime_type',
-        header: 'Type',
-        cell: ({ row }) => (
-            <Badge variant="outline">
-                {row.original.mime_type.split('/')[1].toUpperCase()}
-            </Badge>
-        ),
-    },
-    {
-        accessorKey: 'created_at',
-        header: 'Upload Date',
-        cell: ({ row }) => formatDate(row.original.created_at),
-    },
-    {
-        id: 'actions',
-        cell: ({ row }) => (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                        <MoreVerticalIcon className="h-4 w-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <Link
-                        href={route('admin-images-details', {
-                            id: row.original.id,
-                        })}
-                    >
-                        <DropdownMenuItem>Detail</DropdownMenuItem>
-                    </Link>
-                    <DropdownMenuItem
-                        onClick={() =>
-                            navigator.clipboard.writeText(row.original.path)
-                        }
-                    >
-                        Copy Path
-                    </DropdownMenuItem>
+        // Convert to blob
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
 
-                    <DropdownMenuItem>Download</DropdownMenuItem>
-                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-red-600">
-                        Delete
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        ),
-    },
-];
+        // Create download link
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = photo.original_name;
+        document.body.appendChild(link);
+        link.click();
+
+        // Clean up
+        window.URL.revokeObjectURL(blobUrl);
+        document.body.removeChild(link);
+        toast.success('Download started', { id: toastId });
+    } catch (error) {
+        toast.error('Download failed', { id: toastId });
+    }
+};
+
+// const columns: ColumnDef<Photo>[] = [
+//     {
+//         id: 'select',
+//         header: ({ table }) => (
+//             <Checkbox
+//                 checked={table.getIsAllPageRowsSelected()}
+//                 onCheckedChange={(value) =>
+//                     table.toggleAllPageRowsSelected(!!value)
+//                 }
+//                 aria-label="Select all"
+//             />
+//         ),
+//         cell: ({ row }) => (
+//             <Checkbox
+//                 checked={row.getIsSelected()}
+//                 onCheckedChange={(value) => row.toggleSelected(!!value)}
+//                 aria-label="Select row"
+//             />
+//         ),
+//         enableSorting: false,
+//         enableHiding: false,
+//     },
+//     {
+//         accessorKey: 'original_name',
+//         header: 'File Name',
+//         cell: ({ row }) => {
+//             return (
+//                 <div className="flex items-center gap-2">
+//                     <FileIcon type={row.original.mime_type} />
+//                     <span>{row.original.original_name}</span>
+//                 </div>
+//             );
+//         },
+//     },
+//     {
+//         accessorKey: 'description',
+//         header: 'Description',
+//         cell: ({ row }) => (
+//             <div className="max-w-[200px] truncate">
+//                 {row.original.description || 'No description'}
+//             </div>
+//         ),
+//     },
+//     {
+//         accessorKey: 'user_id',
+//         header: 'Uploaded By',
+//         cell: ({ row }) => (
+//             <div className="flex items-center gap-2">
+//                 <span>{row.original.user.name}</span>
+//                 <Badge variant="outline">{row.original.user.email}</Badge>
+//             </div>
+//         ),
+//     },
+//     {
+//         accessorKey: 'size',
+//         header: 'Size',
+//         cell: ({ row }) => formatFileSize(row.original.size),
+//     },
+//     {
+//         accessorKey: 'mime_type',
+//         header: 'Type',
+//         cell: ({ row }) => (
+//             <Badge variant="outline">
+//                 {row.original.mime_type.split('/')[1].toUpperCase()}
+//             </Badge>
+//         ),
+//     },
+//     {
+//         accessorKey: 'created_at',
+//         header: 'Upload Date',
+//         cell: ({ row }) => formatDate(row.original.created_at),
+//     },
+//     {
+//         id: 'actions',
+//         cell: ({ row }) => (
+//             <DropdownMenu>
+//                 <DropdownMenuTrigger asChild>
+//                     <Button variant="ghost" className="h-8 w-8 p-0">
+//                         <MoreVerticalIcon className="h-4 w-4" />
+//                     </Button>
+//                 </DropdownMenuTrigger>
+//                 <DropdownMenuContent align="end">
+//                     <Link
+//                         href={route('admin-images-details', {
+//                             id: row.original.id,
+//                         })}
+//                     >
+//                         <DropdownMenuItem>Detail</DropdownMenuItem>
+//                     </Link>
+//                     <DropdownMenuItem
+//                         onClick={() =>
+//                             navigator.clipboard.writeText(row.original.path)
+//                         }
+//                     >
+//                         Copy Path
+//                     </DropdownMenuItem>
+
+//                     <DropdownMenuItem
+//                         onClick={(e) => {
+//                             e.preventDefault();
+//                             handleDownload(row.original);
+//                         }}
+//                     >
+//                         Download
+//                     </DropdownMenuItem>
+
+//                     <DropdownMenuSeparator />
+//                     <DropdownMenuItem
+//                         className="text-red-600"
+//                         onClick={(e) => {
+//                             e.preventDefault();
+//                             handleDeleteClick(row.original);
+//                         }}
+//                     >
+//                         Delete
+//                     </DropdownMenuItem>
+//                 </DropdownMenuContent>
+//             </DropdownMenu>
+//         ),
+//     },
+// ];
 
 function FileIcon({ type }: { type: any }) {
     const iconMap = {
@@ -292,10 +345,186 @@ export function DataTable({
         useSensor(TouchSensor, {}),
         useSensor(KeyboardSensor, {}),
     );
+    const handleDeleteClick = async (photo: Photo) => {
+        // Show confirmation dialog
+        const confirmDelete = window.confirm(
+            `Are you sure you want to delete "${photo.original_name}"?`,
+        );
+        if (!confirmDelete) return;
 
+        const toastId = toast.loading('Deleting photo...');
+        try {
+            const response = await fetch(`/api/photos/${photo.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN':
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute('content') || '',
+                },
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Failed to delete photo');
+            }
+
+            // Remove the deleted photo from the state
+            setData((prevData) =>
+                prevData.filter((item) => item.id !== photo.id),
+            );
+
+            toast.success('Photo deleted successfully', { id: toastId });
+        } catch (error) {
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : 'Failed to delete photo',
+                { id: toastId },
+            );
+        }
+    };
     const dataIds = React.useMemo<UniqueIdentifier[]>(
         () => data?.map(({ id }) => id) || [],
         [data],
+    );
+
+    const columns = React.useMemo<ColumnDef<Photo>[]>(
+        () => [
+            {
+                id: 'select',
+                header: ({ table }) => (
+                    <Checkbox
+                        checked={table.getIsAllPageRowsSelected()}
+                        onCheckedChange={(value) =>
+                            table.toggleAllPageRowsSelected(!!value)
+                        }
+                        aria-label="Select all"
+                    />
+                ),
+                cell: ({ row }) => (
+                    <Checkbox
+                        checked={row.getIsSelected()}
+                        onCheckedChange={(value) => row.toggleSelected(!!value)}
+                        aria-label="Select row"
+                    />
+                ),
+                enableSorting: false,
+                enableHiding: false,
+            },
+            {
+                accessorKey: 'original_name',
+                header: 'File Name',
+                cell: ({ row }) => {
+                    return (
+                        <div className="flex items-center gap-2">
+                            <FileIcon type={row.original.mime_type} />
+                            <span>{row.original.original_name}</span>
+                        </div>
+                    );
+                },
+            },
+            {
+                accessorKey: 'description',
+                header: 'Description',
+                cell: ({ row }) => (
+                    <div className="max-w-[200px] truncate">
+                        {row.original.description || 'No description'}
+                    </div>
+                ),
+            },
+            {
+                accessorKey: 'user_id',
+                header: 'Uploaded By',
+                cell: ({ row }) => (
+                    <div className="flex items-center gap-2">
+                        <span>{row.original.user.name}</span>
+                        <Badge variant="outline">
+                            {row.original.user.email}
+                        </Badge>
+                    </div>
+                ),
+            },
+            {
+                accessorKey: 'size',
+                header: 'Size',
+                cell: ({ row }) => formatFileSize(row.original.size),
+            },
+            {
+                accessorKey: 'mime_type',
+                header: 'Type',
+                cell: ({ row }) => (
+                    <Badge variant="outline">
+                        {row.original.mime_type.split('/')[1].toUpperCase()}
+                    </Badge>
+                ),
+            },
+            {
+                accessorKey: 'created_at',
+                header: 'Upload Date',
+                cell: ({ row }) => formatDate(row.original.created_at),
+            },
+            {
+                id: 'actions',
+                cell: ({ row }) => (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <MoreVerticalIcon className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <Link
+                                href={route('admin-images-details', {
+                                    id: row.original.id,
+                                })}
+                            >
+                                <DropdownMenuItem>Detail</DropdownMenuItem>
+                            </Link>
+                            <DropdownMenuItem
+                                onClick={() =>
+                                    navigator.clipboard.writeText(
+                                        row.original.path,
+                                    )
+                                }
+                            >
+                                Copy Path
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleDownload(row.original);
+                                }}
+                            >
+                                Download
+                            </DropdownMenuItem>
+                            {/* <Link
+                                href={route('admin-images.edit', {
+                                    id: row.original.id,
+                                })}
+                            >
+                                <DropdownMenuItem>edit</DropdownMenuItem>
+                            </Link> */}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    console.log(row.original);
+                                    handleDeleteClick(row.original);
+                                }}
+                            >
+                                Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                ),
+            },
+        ],
+        [],
     );
 
     const table = useReactTable({
