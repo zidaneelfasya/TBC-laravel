@@ -1,13 +1,5 @@
 import { router } from '@inertiajs/react';
-import {
-    Calendar,
-    Download,
-    Edit,
-    FileText,
-    Info,
-    Trash,
-    User,
-} from 'lucide-react';
+import { Calendar, Download, FileText, Info, Maximize, Trash, User, Save, PenLine } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface Photo {
@@ -20,6 +12,10 @@ interface Photo {
     mime_type: string;
     created_at: string;
     updated_at: string;
+    user: {
+        name: string;
+        email: string;
+    };
 }
 
 export default function DetailPhoto({ id }: { id: number }) {
@@ -27,17 +23,21 @@ export default function DetailPhoto({ id }: { id: number }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [editableDescription, setEditableDescription] = useState('');
+    const [isDescriptionChanged, setIsDescriptionChanged] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
 
     // Fetch photo data from API
     useEffect(() => {
         const fetchPhoto = async () => {
             try {
-                const response = await fetch(`/api/admin/photos/${id}`);
+                const response = await fetch(`/api/photos/${id}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch photo');
                 }
                 const data = await response.json();
                 setPhoto(data.data);
+                setEditableDescription(data.data.description || '');
             } catch (err) {
                 setError(
                     err instanceof Error
@@ -51,6 +51,50 @@ export default function DetailPhoto({ id }: { id: number }) {
 
         fetchPhoto();
     }, [id]);
+
+    // Handle description change
+    const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const newDescription = e.target.value;
+        setEditableDescription(newDescription);
+        setIsDescriptionChanged(newDescription !== (photo?.description || ''));
+    };
+
+    // Handle update submission
+    const handleUpdateDescription = async () => {
+        if (!photo || !isDescriptionChanged) return;
+
+        setIsUpdating(true);
+        try {
+            const response = await fetch(`/api/photos/desc/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    description: editableDescription
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update photo description');
+            }
+
+            const updatedPhoto = await response.json();
+            setPhoto(updatedPhoto.data);
+            setIsDescriptionChanged(false);
+            
+            // Show success message
+            alert('Description updated successfully');
+        } catch (error) {
+            console.error('Update error:', error);
+            alert('Failed to update description');
+        } finally {
+            setIsUpdating(false);
+            window.location.href = `/admin/images/${id}`;
+
+        }
+    };
 
     // Format file size to readable format
     const formatFileSize = (bytes: number) => {
@@ -82,24 +126,42 @@ export default function DetailPhoto({ id }: { id: number }) {
         }
     };
 
-    // Handle delete confirmation
-    const handleDelete = () => {
-        router.delete(`/api/admin/photos/${id}`, {
-            onSuccess: () => {
-                // Redirect after successful deletion
-                router.visit('/admin/images');
-            },
-            onError: (errors) => {
-                console.error('Delete error:', errors);
-                setIsDeleteModalOpen(false);
-            },
-        });
+    const handleDelete = async () => {
+        try {
+            const response = await fetch(`/api/photos/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete photo');
+            }
+            
+            alert('Photo deleted successfully');
+            window.location.href = '/admin/images';
+            
+        } catch (error) {
+            console.error('Delete error:', error);
+            alert('Failed to delete photo');
+        }
     };
 
-    // Handle download
     const handleDownload = () => {
         if (photo) {
-            window.open(photo.path, '_blank');
+            const link = document.createElement('a');
+            link.href = `/storage/${photo.path}`;
+            link.download = photo.original_name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
+
+    const handleFullscreen = () => {
+        if (photo) {
+            window.open(`/storage/${photo.path}`, '_blank');
         }
     };
 
@@ -151,7 +213,7 @@ export default function DetailPhoto({ id }: { id: number }) {
         <div className="mx-auto max-w-4xl overflow-hidden rounded-xl bg-white shadow-md">
             <div className="flex flex-col">
                 {/* Image Display Area */}
-                <div className="flex items-center justify-center bg-gray-100 p-4">
+                <div className="flex items-center justify-center bg-gray-200 p-4">
                     <div className="inline-block max-h-[70vh] max-w-full overflow-hidden rounded-lg shadow-sm">
                         <img
                             src={`/storage/${photo.path}`}
@@ -168,7 +230,7 @@ export default function DetailPhoto({ id }: { id: number }) {
                 </div>
 
                 {/* Details Area */}
-                <div className="p-6 md:w-1/2">
+                <div className="p-6">
                     <div className="flex items-start justify-between">
                         <h2 className="mb-2 truncate text-2xl font-bold text-gray-800">
                             {photo.original_name}
@@ -183,16 +245,33 @@ export default function DetailPhoto({ id }: { id: number }) {
                             >
                                 <Download className="h-5 w-5" />
                             </button>
+                            
+                           
                             <button
-                                onClick={() =>
-                                    router.visit(
-                                        `/admin/images/${photo.id}/edit`,
-                                    )
-                                }
-                                className="rounded-full p-2 text-green-600 transition-colors hover:bg-green-50"
-                                title="Edit"
+                                onClick={handleFullscreen}
+                                className="rounded-full p-2 text-gray-600 transition-colors hover:bg-gray-50"
+                                title="Open in fullscreen"
                             >
-                                <Edit className="h-5 w-5" />
+                                <Maximize className="h-5 w-5" />
+                            </button>
+                            <button
+                                onClick={() => {
+                                    const newWindow = window.open(
+                                        `/admin/images/edit/${photo.id}`,
+                                        '_blank',
+                                    );
+                                    if (newWindow) {
+                                        newWindow.focus();
+                                    } else {
+                                        alert(
+                                            'Please allow popups for this website',
+                                        );
+                                    }
+                                }}
+                                className="rounded-full p-2 text-blue-600 transition-colors hover:bg-blue-50"
+                                title="Edit Image"
+                            >
+                                <PenLine className="h-5 w-5" />
                             </button>
                             <button
                                 onClick={() => setIsDeleteModalOpen(true)}
@@ -209,13 +288,13 @@ export default function DetailPhoto({ id }: { id: number }) {
                         <h3 className="mb-1 text-sm font-medium text-gray-500">
                             Deskripsi
                         </h3>
-                        <p className="text-gray-700">
-                            {photo.description || (
-                                <span className="italic text-gray-400">
-                                    Tidak ada deskripsi
-                                </span>
-                            )}
-                        </p>
+                        <textarea
+                            value={editableDescription}
+                            onChange={handleDescriptionChange}
+                            className="w-full resize-none rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            rows={3}
+                            placeholder="Tambahkan deskripsi..."
+                        />
                     </div>
 
                     {/* Details list */}
@@ -252,7 +331,10 @@ export default function DetailPhoto({ id }: { id: number }) {
                                     Dimiliki oleh
                                 </p>
                                 <p className="text-gray-700">
-                                    User ID: {photo.user_id}
+                                    User: {photo.user.name}
+                                </p>
+                                <p className="text-gray-700">
+                                    Email: {photo.user.email}
                                 </p>
                             </div>
                         </div>
@@ -266,6 +348,24 @@ export default function DetailPhoto({ id }: { id: number }) {
                                 <p className="text-gray-700">{photo.id}</p>
                             </div>
                         </div>
+                    </div>
+
+                    {/* Update button fixed at bottom right */}
+                    <div className="mt-6 flex justify-end">
+                        <button
+                            onClick={handleUpdateDescription}
+                            disabled={!isDescriptionChanged || isUpdating}
+                            className={`flex items-center rounded-md px-4 py-2 text-white ${isDescriptionChanged ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
+                        >
+                            {isUpdating ? (
+                                'Memperbarui...'
+                            ) : (
+                                <>
+                                    <Save className="mr-2 h-4 w-4" />
+                                    Simpan Perubahan
+                                </>
+                            )}
+                        </button>
                     </div>
                 </div>
             </div>
