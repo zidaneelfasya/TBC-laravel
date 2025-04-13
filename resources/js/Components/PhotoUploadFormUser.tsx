@@ -77,7 +77,7 @@ export default function PhotoUploadForm() {
         }
     };
 
-    const formatFileSize = (bytes) => {
+    const formatFileSize = (bytes: number) => {
         if (bytes === 0) return '0 Bytes';
         const k = 1024;
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -86,50 +86,53 @@ export default function PhotoUploadForm() {
     };
 
     const handleSubmit = async (e) => {
-      e.preventDefault();
-  
-      if (!form.file) {
-          alert('Silakan pilih gambar terlebih dahulu');
-          return;
-      }
-  
-      setIsUploading(true);
-  
-      try {
-          const formData = new FormData();
-          formData.append('file', form.file);
-          formData.append('description', form.description);
-  
-          const response = await fetch('/api/photos', {
-              method: 'POST',
-              headers: {
-                  'Accept': 'application/json',
-                  // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-              },
-              body: formData,
-              credentials: 'include' // Untuk mengirim cookie/session
-          });
-  
-          if (!response.ok) {
-              throw new Error('Upload failed');
-          }
-  
-          const data = await response.json();
-          
-          setUploadSuccess(true);
-          setTimeout(() => setUploadSuccess(false), 3000);
-          
-          // Reset form setelah upload sukses
-          handleRemoveFile();
-          setForm({ ...form, description: '' });
-  
-      } catch (error) {
-          console.error('Upload error:', error);
-          alert('Terjadi kesalahan saat mengunggah gambar: ' + error.message);
-      } finally {
-          setIsUploading(false);
-      }
-  };
+        e.preventDefault();
+
+        if (!form.file) {
+            alert('Silakan pilih gambar terlebih dahulu');
+            return;
+        }
+
+        setIsUploading(true);
+
+        try {
+            const formData = new FormData();
+            formData.append('file', form.file);
+            formData.append('description', form.description);
+
+            const response = await fetch('/api/photos', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            },
+            body: formData,
+            credentials: 'include', // Untuk mengirim cookie/session
+            });
+
+            if (!response.ok) {
+            throw new Error('Upload failed');
+            }
+
+            const data = await response.json();
+
+            setUploadSuccess(true);
+            setTimeout(() => setUploadSuccess(false), 3000);
+
+            // Reset form setelah upload sukses
+            handleRemoveFile();
+            setForm({ ...form, description: '' });
+
+            
+        } catch (error) {
+            console.error('Upload error:', error);
+            alert('Terjadi kesalahan saat mengunggah gambar: ' + error);
+        } finally {
+            setIsUploading(false);
+            window.location.href = '/dashboard';
+
+        }
+    };
 
     return (
         <div className="flex min-h-screen items-center justify-center">
