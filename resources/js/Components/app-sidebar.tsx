@@ -165,7 +165,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="#">
                 <University className="h-5 w-5" />
-                <span className="text-base font-semibold">TBC ACA</span>
+                <span className="text-base font-semibold">TBC ACA (admin)</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
