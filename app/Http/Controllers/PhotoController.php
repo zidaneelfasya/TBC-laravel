@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-
+use Inertia\Inertia;
 
 class PhotoController extends Controller
 {
@@ -17,7 +17,7 @@ class PhotoController extends Controller
      */
     public function index(Request $request)
     {
-        $photo = Photo::all();
+        $photo = Photo::with('user:id,name,email')->get();
         return response()->json([
             'success' => true,
             'message' => 'List of photos',
@@ -30,7 +30,10 @@ class PhotoController extends Controller
      */
     public function indexUser()
     {
-        $photos = Photo::where('user_id', Auth::id())->get();
+        $photos = Photo::with('user:id,name,email')
+            ->where('user_id', Auth::id())
+            ->get();
+
         return response()->json([
             'success' => true,
             'message' => 'List of user photos',
@@ -52,14 +55,14 @@ class PhotoController extends Controller
         try {
             // Dapatkan file dari request
             $file = $request->file('file');
-            
+
             // Generate nama file yang unik
             $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
-            
+
             // Simpan file ke storage
-            
+
             $path = $file->storeAs('photos', $fileName, 'public');
-            
+
             // Buat record photo di database
             $photo = Photo::create([
                 'user_id' => Auth::id(),
@@ -76,7 +79,6 @@ class PhotoController extends Controller
                 'message' => 'Photo uploaded successfully',
                 'data' => $photo,
             ], 201);
-
         } catch (\Exception $e) {
             // Jika terjadi error, kembalikan response error
             return response()->json([
@@ -92,7 +94,9 @@ class PhotoController extends Controller
      */
     public function show(string $id)
     {
-        $photo = Photo::find($id);
+        // $photo = Photo::with($id);
+        $photo = Photo::with('user:id,name,email')
+            ->find($id);
         if (!$photo) {
             return response()->json([
                 'success' => false,
@@ -109,24 +113,132 @@ class PhotoController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Photo $photo)
     {
-        //
+        // Check if user owns this photo
+        // $this->authorize('update', $photo);
+
+        return Inertia::render('Photos/Edit', [
+            'photo' => $photo
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function updateDesc(Request $request, $id)
     {
-        //
+        // Find the photo
+        $photo = Photo::findOrFail($id);
+
+        // Validate request
+        $request->validate([
+            'file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // Maksimal 10MB
+            'description' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            if (($request->description !== '') || ($request->description !== null)) {
+                $updateData = [
+                    'description' => $request->description,
+                ];
+            }
+
+
+            if ($request->hasFile('file')) {
+                // Delete old file
+                Storage::delete($photo->path);
+
+                // Upload new file
+                $file = $request->file('file');
+                $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('photos', $fileName, 'public');
+
+                $updateData = array_merge($updateData, [
+                    'path' => $path,
+                    'original_name' => $file->getClientOriginalName(),
+                    'size' => $file->getSize(),
+                    'mime_type' => $file->getMimeType(),
+                ]);
+            }
+
+            // Update the photo
+            $photo->update($updateData);
+
+            // Return response
+            return response()->json([
+                'success' => true,
+                'message' => 'Photo updated successfully',
+                'data' => $photo,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update photo',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
+    public function updatePhoto(Request $request, $id)
+{
+    $request->validate([
+        'file' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
+    ]);
+
+    $photo = Photo::findOrFail($id);
+
+    try {
+        // Delete old file if exists
+        if (Storage::exists($photo->path)) {
+            Storage::delete($photo->path);
+        }
+
+        // Store new file
+        $file = $request->file('file');
+        $file = $request->file('file');
+        $path = $file->store('photos', 'public');
+
+        $photo->update([
+            'path' => $path,
+            'original_name' => $file->getClientOriginalName(),
+            'size' => $file->getSize(),
+            'mime_type' => $file->getMimeType(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Photo updated successfully',
+            'data' => $photo,
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Photo update error: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to update photo',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+}
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        try {
+            $photo = Photo::findOrFail($id);
+            Storage::delete($photo->path);
+            $photo->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Photo deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete photo: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

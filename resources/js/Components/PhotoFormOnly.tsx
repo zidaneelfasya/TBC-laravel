@@ -1,7 +1,7 @@
 import { Camera, Check, Upload, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 
-export default function PhotoUploadForm() {
+export default function PhotoFormOnly({ id}: { id: number}) {
     const [form, setForm] = useState({
         description: '',
         file: null,
@@ -86,50 +86,54 @@ export default function PhotoUploadForm() {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+      e.preventDefault();
+  
+      if (!form.file) {
+          alert('Silakan pilih gambar terlebih dahulu');
+          return;
+      }
+  
+      setIsUploading(true);
+  
+      try {
+          const formData = new FormData();
+          // Make sure the key matches what Laravel expects ('file' in this case)
+          formData.append('file', form.file);
+          console.log('FormData entries:', Array.from(formData.entries())); // Debug log
+  
+          const response = await fetch(`/api/photos/photo/${id}`, {
+              method: 'POST',
+              // DON'T set Content-Type header - let the browser set it automatically
+              // with the correct boundary for FormData
+              headers: {
+                  'Accept': 'application/json',
+                  // Uncomment if using CSRF protection
+                  // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+              },
+              body: formData,
+              credentials: 'include',
+          });
+  
+          if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.message || 'Upload failed');
+          }
+  
+          const data = await response.json();
+          console.log('Response data:', data); // Debug log
+          setUploadSuccess(true);
+          setTimeout(() => setUploadSuccess(false), 3000);
+  
+          // Optionally refresh the page or update the state
+          window.location.href = `/images/${id}`;
 
-        if (!form.file) {
-            alert('Silakan pilih gambar terlebih dahulu');
-            return;
-        }
-
-        setIsUploading(true);
-
-        try {
-            const formData = new FormData();
-            formData.append('file', form.file);
-            formData.append('description', form.description);
-
-            const response = await fetch('/api/photos', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                },
-                body: formData,
-                credentials: 'include', // Untuk mengirim cookie/session
-            });
-
-            if (!response.ok) {
-                throw new Error('Upload failed');
-            }
-
-            const data = await response.json();
-
-            setUploadSuccess(true);
-            setTimeout(() => setUploadSuccess(false), 3000);
-
-            // Reset form setelah upload sukses
-            handleRemoveFile();
-            setForm({ ...form, description: '' });
-        } catch (error) {
-            console.error('Upload error:', error);
-            alert('Terjadi kesalahan saat mengunggah gambar: ' + error.message);
-        } finally {
-            setIsUploading(false);
-            window.location.href = '/admin/images';
-        }
-    };
+      } catch (error) {
+          console.error('Upload error:', error);
+          alert(`Terjadi kesalahan: ${error.message}`);
+      } finally {
+          setIsUploading(false);
+      }
+  };
 
     return (
         <div className="flex min-h-screen items-center justify-center">
@@ -202,9 +206,7 @@ export default function PhotoUploadForm() {
                             onChange={handleFileInputChange}
                         />
                     </div>
-
-                    {/* Description Field */}
-                    <div className="mb-6">
+                    {/* <div className="mb-6">
                         <label
                             className="mb-1 block text-sm font-medium text-gray-700"
                             htmlFor="description"
@@ -224,7 +226,7 @@ export default function PhotoUploadForm() {
                                 })
                             }
                         ></textarea>
-                    </div>
+                    </div> */}
 
                     {/* Submit Button */}
                     <div className="flex justify-end">

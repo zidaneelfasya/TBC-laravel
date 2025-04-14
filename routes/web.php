@@ -22,7 +22,7 @@ Route::get('/', function () {
 });
 
 // Route::get('/dashboard', function () {
-    
+
 // })->middleware(['auth', 'verified'])->name('dashboard')->middleware(UserMiddleware::class);
 
 // Route::get('/admin/dashboard', function () {
@@ -31,47 +31,124 @@ Route::get('/', function () {
 Route::post('/api/register', [RegisteredUserController::class, 'store']);
 
 
-Route::middleware(['auth', 'verified'])->middleware(UserMiddleware::class)->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard'); 
-    Route::get('/images/create', function () {
-        return Inertia::render('Add');
-    })->name('Images-add'); 
-    Route::get('/images/{id}', function () {
-        return Inertia::render('');
-    })->name('Images-add'); 
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Common routes for both user and admin
+
+    // User-specific routes
+    Route::middleware(UserMiddleware::class)->group(function () {
+        Route::get('/dashboard', function () {
+            return Inertia::render('Dashboard');
+        })->name('dashboard');
+        Route::get('/images/create', function () {
+            return Inertia::render('Add');
+        })->name('Images-add');
+        Route::get('/images/{id}', function ($id) {
+            return Inertia::render('Detail', [
+                'id' => $id
+            ]);
+        })->name('images-details');
+        Route::get('/images/edit/{id}', function ($id) {
+            return Inertia::render('Edit', [
+                'id' => $id
+            ]);
+        })->name('images.edit');
+    });
+
+    // Admin-specific routes
+    Route::middleware(AdminMiddleware::class)->group(function () {
+        Route::get('/admin', function () {
+            return Inertia::render('admin/dashboard');
+        })->name('admin');
+        Route::get('/admin/dashboard', function () {
+            return Inertia::render('admin/dashboard');
+        })->name('admin-dashboard');
+        Route::get('/admin/images', function () {
+            return Inertia::render('admin/images/Images');
+        })->name('admin-Images');
+        Route::get('/admin/images/create', function () {
+            return Inertia::render('admin/images/Add');
+        })->name('admin-Images-add');
+        Route::get('/admin/images/{id}', function ($id) {
+            return Inertia::render('admin/images/Detail', [
+                'id' => $id
+            ]);
+        })->name('admin-images-details');
+        Route::get('/admin/images/edit/{id}', function ($id) {
+            return Inertia::render('admin/images/Edit', [
+                'id' => $id
+            ]);
+        })->name('admin-images.edit');
+        // Route::get('/admin/images/{id}/edit', function ($id) {
+        //     return Inertia::render('admin/images/Edit', ['id' => $id]);
+        // })->name('admin-images.edit');
+        Route::get('/api/photos/all', [PhotoController::class, 'index'])->name('photos.all');
+        // Route::get('/api/images/edit/{photos}', [PhotoController::class, 'edit'])->name('admin-image.edit');
+    });
+
+    // API routes that both can access
     Route::get('/api/photos', [PhotoController::class, 'indexUser'])->name('photos.index');
     Route::post('/api/photos', [PhotoController::class, 'store'])->name('photos.store');
-    Route::get('/api/images/{id}', [PhotoController::class, 'show'])->name('admin-photos.show');
+    Route::get('/api/photos/{id}', [PhotoController::class, 'show'])->name('photos.show');
+    Route::put('/api/photos/desc/{id}', [PhotoController::class, 'updateDesc'])->name('photos-desc.update');
+    Route::post('/api/photos/photo/{id}', [PhotoController::class, 'updatePhoto'])->name('photos-photo.update');
 
-
+    Route::delete('/api/photos/{id}', [PhotoController::class, 'destroy'])->name('photos.destroy');
 });
 
-Route::middleware(['auth', 'verified'])->middleware(AdminMiddleware::class)->group(function () {
-    Route::get('/admin/dashboard', function () {
-        return Inertia::render('admin/dashboard');
-    })->name('admin-dashboard'); 
-    Route::get('/admin/images', function () {
-        return Inertia::render('admin/images/Images');
-    })->name('admin-Images'); 
-    Route::get('/admin/images/create', function () {
-        return Inertia::render('admin/images/Add');
-    })->name('admin-Images-add'); 
-    Route::get('/admin/images/{id}', function ($id) {
-        return Inertia::render('admin/images/Detail', [
-            'id' => $id
-        ]);
-    })->name('admin-images-details');
-    Route::post('/api/admin/photos', [PhotoController::class, 'store'])->name('admin-photos.store');
-    Route::get('/api/admin/photos', [PhotoController::class, 'index'])->name('admin-photos.index');
-    Route::get('/api/admin/photos/{id}', [PhotoController::class, 'show'])->name('admin-photos.show');
+// Route::middleware(['auth', 'verified'])->middleware(UserMiddleware::class)->group(function () {
+//     // Route::get('/', function () {
+//     //     return Inertia::render('Dashboard');
+//     // })->name('dashboard'); 
+//     Route::get('/dashboard', function () {
+//         return Inertia::render('Dashboard');
+//     })->name('dashboard'); 
+//     Route::get('/images/create', function () {
+//         return Inertia::render('Add');
+//     })->name('Images-add'); 
+//     Route::get('/images/{id}', function ($id) {
+//         return Inertia::render('Detail', [
+//             'id' => $id
+//         ]);
+//     })->name('images-details'); 
+//     Route::get('/api/photos', [PhotoController::class, 'indexUser'])->name('photos.index');
+//     Route::post('/api/photos', [PhotoController::class, 'store'])->name('photos.store');
+//     Route::get('/api/photos/{id}', [PhotoController::class, 'show'])->name('photos.show');
+//     // Route::get('/api/admin/photos/{id}', [PhotoController::class, 'show'])->name('admin-photos.show');
+//     Route::put('/api/photos/{id}', [PhotoController::class, 'update'])->name('photos.update');
 
-    Route::put('/api/admin/photos/{id}', [PhotoController::class, 'update'])->name('admin-photos.update');
-    Route::delete('/api/admin/photos/{id}', [PhotoController::class, 'destroy'])->name('admin-photos.destroy');
+//     Route::delete('/api/photos/{id}', [PhotoController::class, 'destroy'])->name('photos.destroy');
+//     // Route::delete('/api/photos/{id}', [PhotoController::class, 'destroy'])->name('photos.destroy');
 
-    
-});
+
+
+// });
+
+// Route::middleware(['auth', 'verified'])->middleware(AdminMiddleware::class)->group(function () {
+//     Route::get('/admin', function () {
+//         return Inertia::render('admin/dashboard');
+//     })->name('admin'); 
+//     Route::get('/admin/dashboard', function () {
+//         return Inertia::render('admin/dashboard');
+//     })->name('admin-dashboard'); 
+//     Route::get('/admin/images', function () {
+//         return Inertia::render('admin/images/Images');
+//     })->name('admin-Images'); 
+//     Route::get('/admin/images/create', function () {
+//         return Inertia::render('admin/images/Add');
+//     })->name('admin-Images-add'); 
+//     Route::get('/admin/images/{id}', function ($id) {
+//         return Inertia::render('admin/images/Detail', [
+//             'id' => $id
+//         ]);
+//     })->name('admin-images-details');
+//     Route::post('/api/admin/photos', [PhotoController::class, 'store'])->name('admin-photos.store');
+//     Route::get('/api/admin/photos', [PhotoController::class, 'index'])->name('admin-photos.index');
+//     Route::get('/api/admin/photos/{id}', [PhotoController::class, 'show'])->name('admin-photos.show');
+//     Route::put('/api/admin/photos/{id}', [PhotoController::class, 'update'])->name('admin-photos.update');
+//     Route::delete('/api/admin/photos/{id}', [PhotoController::class, 'destroy'])->name('admin-photos.destroy');
+
+
+// });
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -79,4 +156,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

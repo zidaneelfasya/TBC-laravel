@@ -257,7 +257,7 @@ export default function DetailPhoto({ id }: { id: number }) {
                             <button
                                 onClick={() => {
                                     const newWindow = window.open(
-                                        `/admin/images/edit/${photo.id}`,
+                                        `/images/edit/${photo.id}`,
                                         '_blank',
                                     );
                                     if (newWindow) {
