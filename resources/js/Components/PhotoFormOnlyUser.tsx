@@ -125,7 +125,7 @@ export default function PhotoFormOnly({ id}: { id: number}) {
           setTimeout(() => setUploadSuccess(false), 3000);
   
           
-          window.location.href = `/admin/images/${id}`;
+          window.location.href = `/images/${id}`;
 
       } catch (error) {
           console.error('Upload error:', error);

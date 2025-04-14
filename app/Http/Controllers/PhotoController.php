@@ -6,6 +6,7 @@ use App\Models\Photo;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -97,6 +98,10 @@ class PhotoController extends Controller
         // $photo = Photo::with($id);
         $photo = Photo::with('user:id,name,email')
             ->find($id);
+        if (Auth::user()->role !== 'admin' && Auth::user()->id !== $photo->user_id) {
+            abort(403, 'Unauthorized action.');
+            
+        }
         if (!$photo) {
             return response()->json([
                 'success' => false,
@@ -181,45 +186,45 @@ class PhotoController extends Controller
     }
 
     public function updatePhoto(Request $request, $id)
-{
-    $request->validate([
-        'file' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
-    ]);
+    {
+        $request->validate([
+            'file' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
+        ]);
 
-    $photo = Photo::findOrFail($id);
+        $photo = Photo::findOrFail($id);
 
-    try {
-        // Delete old file if exists
-        if (Storage::exists($photo->path)) {
-            Storage::delete($photo->path);
+        try {
+            // Delete old file if exists
+            if (Storage::exists($photo->path)) {
+                Storage::delete($photo->path);
+            }
+
+            // Store new file
+            $file = $request->file('file');
+            $file = $request->file('file');
+            $path = $file->store('photos', 'public');
+
+            $photo->update([
+                'path' => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'size' => $file->getSize(),
+                'mime_type' => $file->getMimeType(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Photo updated successfully',
+                'data' => $photo,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Photo update error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update photo',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        // Store new file
-        $file = $request->file('file');
-        $file = $request->file('file');
-        $path = $file->store('photos', 'public');
-
-        $photo->update([
-            'path' => $path,
-            'original_name' => $file->getClientOriginalName(),
-            'size' => $file->getSize(),
-            'mime_type' => $file->getMimeType(),
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Photo updated successfully',
-            'data' => $photo,
-        ]);
-    } catch (\Exception $e) {
-        \Log::error('Photo update error: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to update photo',
-            'error' => $e->getMessage(),
-        ], 500);
     }
-}
     /**
      * Remove the specified resource from storage.
      */
