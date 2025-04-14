@@ -32,23 +32,34 @@ export default function DetailPhoto({ id }: { id: number }) {
         const fetchPhoto = async () => {
             try {
                 const response = await fetch(`/api/photos/${id}`);
+                
+                if (response.status === 403) {
+                    throw new Error('Anda tidak memiliki akses ke foto ini');
+                }
+                
                 if (!response.ok) {
                     throw new Error('Failed to fetch photo');
                 }
+                
                 const data = await response.json();
                 setPhoto(data.data);
                 setEditableDescription(data.data.description || '');
             } catch (err) {
                 setError(
-                    err instanceof Error
-                        ? err.message
-                        : 'An unknown error occurred',
+                    err instanceof Error 
+                        ? err.message 
+                        : 'An unknown error occurred'
                 );
+                
+                // Redirect jika unauthorized
+                if (err instanceof Error && err.message.includes('tidak memiliki akses')) {
+                    router.get('/dashboard');
+                }
             } finally {
                 setLoading(false);
             }
         };
-
+    
         fetchPhoto();
     }, [id]);
 
@@ -91,7 +102,7 @@ export default function DetailPhoto({ id }: { id: number }) {
             alert('Failed to update description');
         } finally {
             setIsUpdating(false);
-            window.location.href = `/admin/images/${id}`;
+            window.location.href = `/images/${id}`;
 
         }
     };
@@ -140,7 +151,7 @@ export default function DetailPhoto({ id }: { id: number }) {
             }
             
             alert('Photo deleted successfully');
-            window.location.href = '/admin/images';
+            window.location.href = '/dashboard';
             
         } catch (error) {
             console.error('Delete error:', error);
