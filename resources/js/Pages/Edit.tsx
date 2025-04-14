@@ -1,7 +1,8 @@
 
 
 
-import PhotoFormOnly from '@/Components/PhotoFormOnly';
+
+import PhotoFormOnly from '@/Components/PhotoFormOnlyUser';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps } from '@/types';
 
