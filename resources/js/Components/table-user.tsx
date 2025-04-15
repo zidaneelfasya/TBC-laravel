@@ -1,54 +1,3 @@
-import toast from 'react-hot-toast';
-import {
-    DndContext,
-    KeyboardSensor,
-    MouseSensor,
-    TouchSensor,
-    closestCenter,
-    useSensor,
-    useSensors,
-    type DragEndEvent,
-    type UniqueIdentifier,
-} from '@dnd-kit/core';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import {
-    SortableContext,
-    arrayMove,
-    useSortable,
-    verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import {
-    ColumnDef,
-    ColumnFiltersState,
-    Row,
-    SortingState,
-    VisibilityState,
-    flexRender,
-    getCoreRowModel,
-    getFacetedRowModel,
-    getFacetedUniqueValues,
-    getFilteredRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
-    useReactTable,
-} from '@tanstack/react-table';
-import {
-    ChevronDownIcon,
-    ChevronLeftIcon,
-    ChevronRightIcon,
-    ChevronsLeftIcon,
-    ChevronsRightIcon,
-    ColumnsIcon,
-    MoreVerticalIcon,
-    PlusIcon,
-    UserIcon,
-    MailIcon,
-    KeyIcon,
-    CalendarIcon,
-} from 'lucide-react';
-import * as React from 'react';
-import { z } from 'zod';
 import { Badge } from '@/Components/ui/badge';
 import { Button } from '@/Components/ui/button';
 import { Checkbox } from '@/Components/ui/checkbox';
@@ -57,7 +6,6 @@ import {
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/Components/ui/dropdown-menu';
 import { Label } from '@/Components/ui/label';
@@ -77,7 +25,57 @@ import {
     TableRow,
 } from '@/Components/ui/table';
 import { Tabs, TabsContent } from '@/Components/ui/tabs';
+import {
+    DndContext,
+    KeyboardSensor,
+    MouseSensor,
+    TouchSensor,
+    closestCenter,
+    useSensor,
+    useSensors,
+    type DragEndEvent,
+    type UniqueIdentifier,
+} from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import {
+    SortableContext,
+    arrayMove,
+    useSortable,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Link } from '@inertiajs/react';
+import {
+    ColumnDef,
+    ColumnFiltersState,
+    Row,
+    SortingState,
+    VisibilityState,
+    flexRender,
+    getCoreRowModel,
+    getFacetedRowModel,
+    getFacetedUniqueValues,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    useReactTable,
+} from '@tanstack/react-table';
+import {
+    CalendarIcon,
+    ChevronDownIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    ChevronsLeftIcon,
+    ChevronsRightIcon,
+    ColumnsIcon,
+    MailIcon,
+    MoreVerticalIcon,
+    PlusIcon,
+    UserIcon,
+} from 'lucide-react';
+import * as React from 'react';
+import toast from 'react-hot-toast';
+import { z } from 'zod';
 
 export const schema = z.object({
     id: z.number(),
@@ -101,7 +99,7 @@ function RoleBadge({ role }: { role: string }) {
         editor: 'bg-purple-500',
         // Add more roles as needed
     };
-    
+
     return (
         <Badge className={`${roleColors[role] || 'bg-gray-500'} text-white`}>
             {role}
@@ -141,8 +139,10 @@ export function DataTable({
 }) {
     const [data, setData] = React.useState(() => initialData);
     const [rowSelection, setRowSelection] = React.useState({});
-    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+    const [columnVisibility, setColumnVisibility] =
+        React.useState<VisibilityState>({});
+    const [columnFilters, setColumnFilters] =
+        React.useState<ColumnFiltersState>([]);
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [pagination, setPagination] = React.useState({
         pageIndex: 0,
@@ -156,41 +156,40 @@ export function DataTable({
     );
 
     const handleDeleteClick = async (user: User) => {
-        const confirmDelete = window.confirm(
-            `Are you sure you want to delete user "${user.name}"?`,
-        );
-        if (!confirmDelete) return;
-
-        const toastId = toast.loading('Deleting user...');
+        if (!confirm(`Are you sure you want to delete user "${user.name}"?`)) {
+            return;
+        }
+    
         try {
-            const response = await fetch(`/api/users/${user.id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN':
-                        document
-                            .querySelector('meta[name="csrf-token"]')
-                            ?.getAttribute('content') || '',
+            const response = await fetch(
+                route('api.users.destroy', { user: user.id }),
+                {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN':
+                            document
+                                .querySelector('meta[name="csrf-token"]')
+                                ?.getAttribute('content') || '',
+                    },
                 },
-            });
-
+            );
+    
             const result = await response.json();
-
-            if (!response.ok || !result.success) {
+    
+            if (!response.ok) {
                 throw new Error(result.message || 'Failed to delete user');
             }
-
-            setData((prevData) =>
-                prevData.filter((item) => item.id !== user.id),
-            );
-
-            toast.success('User deleted successfully', { id: toastId });
+    
+            toast.success('Account deleted successfully');
+            // Use Inertia's redirect instead of window.location
+            window.location.href = '/admin/users'; // Consider using Inertia's router instead
         } catch (error) {
+            console.error('Delete error:', error);
             toast.error(
                 error instanceof Error
                     ? error.message
                     : 'Failed to delete user',
-                { id: toastId },
             );
         }
     };
@@ -278,6 +277,13 @@ export function DataTable({
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                            <Link
+                                href={route('admin.users.show', {
+                                    user: row.original.id,
+                                })}
+                            >
+                                <DropdownMenuItem>Detail</DropdownMenuItem>
+                            </Link>
                             {/* <Link
                                 href={route('admin-users-edit', {
                                     id: row.original.id,
