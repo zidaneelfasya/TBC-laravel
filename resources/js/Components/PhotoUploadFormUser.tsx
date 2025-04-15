@@ -129,7 +129,7 @@ export default function PhotoUploadForm() {
             alert('Terjadi kesalahan saat mengunggah gambar: ' + error);
         } finally {
             setIsUploading(false);
-            window.location.href = '/dashboard';
+            window.location.href = '/guest/panel';
 
         }
     };

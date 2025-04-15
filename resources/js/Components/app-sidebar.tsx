@@ -52,18 +52,14 @@ const data = {
       icon: Images,
     },
     {
-      title: "Analytics",
-      url: "#",
-      icon: BarChartIcon,
+      title: "Images",
+      url: "/admin/users",
+      icon: Images,
     },
+    
     {
-      title: "Projects",
-      url: "#",
-      icon: FolderIcon,
-    },
-    {
-      title: "Team",
-      url: "#",
+      title: "User",
+      url: "/admin/users",
       icon: UsersIcon,
     },
   ],

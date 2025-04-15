@@ -1,19 +1,20 @@
 <?php
 
-use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Models\User;
+use Inertia\Inertia;
+use GuzzleHttp\Psr7\Request;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Application;
+use App\Http\Middleware\UserMiddleware;
+use App\Http\Controllers\UserController;
+use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Middleware\AdminMiddleware;
-use App\Http\Middleware\UserMiddleware;
-use App\Models\User;
-use GuzzleHttp\Psr7\Request;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+use App\Http\Controllers\Auth\RegisteredUserController;
 
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
+    return Inertia::render('LandingPage', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
@@ -36,9 +37,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // User-specific routes
     Route::middleware(UserMiddleware::class)->group(function () {
-        Route::get('/dashboard', function () {
+        Route::get('/guest/panel', function () {
             return Inertia::render('Dashboard');
         })->name('dashboard');
+        Route::get('/guest', function () {
+            return Inertia::render('Guest');
+        })->name('guest');
         Route::get('/images/create', function () {
             return Inertia::render('Add');
         })->name('Images-add');
@@ -65,6 +69,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/images', function () {
             return Inertia::render('admin/images/Images');
         })->name('admin-Images');
+        Route::get('/admin/users', function () {
+            return Inertia::render('admin/user/User');
+        })->name('admin-users');
         Route::get('/admin/images/create', function () {
             return Inertia::render('admin/images/Add');
         })->name('admin-Images-add');
@@ -81,9 +88,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Route::get('/admin/images/{id}/edit', function ($id) {
         //     return Inertia::render('admin/images/Edit', ['id' => $id]);
         // })->name('admin-images.edit');
-        Route::get('/api/photos/all', [PhotoController::class, 'index'])->name('photos.all');
         // Route::get('/api/images/edit/{photos}', [PhotoController::class, 'edit'])->name('admin-image.edit');
+        Route::get('/api/user', [UserController::class, 'index'])->name('user.index');
     });
+    Route::get('/api/photos/all', [PhotoController::class, 'index'])->name('photos.all');
 
     // API routes that both can access
     Route::get('/api/photos', [PhotoController::class, 'indexUser'])->name('photos.index');

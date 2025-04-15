@@ -15,6 +15,10 @@ type Photo = {
     description: string;
     created_at: string;
     updated_at: string;
+    user: {
+        name: string;
+        email: string;
+    }
 };
 
 export default function Dashboard() {
@@ -65,7 +69,7 @@ export default function Dashboard() {
         <AuthenticatedLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Dashboard
+                    Panel
                 </h2>
             }
         >
