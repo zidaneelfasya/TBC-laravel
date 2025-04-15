@@ -72,6 +72,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/users', function () {
             return Inertia::render('admin/user/User');
         })->name('admin-users');
+        Route::get('/admin/users/create', function () {
+            return Inertia::render('admin/user/Add');
+        })->name('admin-users.create');
         Route::get('/admin/images/create', function () {
             return Inertia::render('admin/images/Add');
         })->name('admin-Images-add');
@@ -85,11 +88,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 'id' => $id
             ]);
         })->name('admin-images.edit');
+
         // Route::get('/admin/images/{id}/edit', function ($id) {
         //     return Inertia::render('admin/images/Edit', ['id' => $id]);
         // })->name('admin-images.edit');
         // Route::get('/api/images/edit/{photos}', [PhotoController::class, 'edit'])->name('admin-image.edit');
         Route::get('/api/user', [UserController::class, 'index'])->name('user.index');
+        Route::get('admin/users/{user}', [UserController::class, 'show'])->name('admin.users.show');
+        Route::post('admin/users/store', [UserController::class, 'store'])->name('admin.users.store');
+
+        Route::put('/api/users/update/{user}', [UserController::class, 'update'])->name('api.users.update');
+        Route::delete('/api/users/delete/{user}', [UserController::class, 'destroy'])->name('api.users.destroy');
     });
     Route::get('/api/photos/all', [PhotoController::class, 'index'])->name('photos.all');
 

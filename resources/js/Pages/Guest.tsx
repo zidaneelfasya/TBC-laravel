@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 // import { usePage } from '@inertiajs/inertia-react';
 import Dropdown from '@/Components/Dropdown';
+import { Link, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import {
     Bookmark,
@@ -11,7 +12,6 @@ import {
     Share2,
     User,
 } from 'lucide-react';
-import { usePage } from '@inertiajs/react';
 
 // Define TypeScript interfaces
 interface Photo {
@@ -120,12 +120,13 @@ const PhotoFeed: React.FC<PhotoFeedProps> = ({ initialPhotos = [] }) => {
                 <div className="mx-auto max-w-5xl px-4">
                     <div className="flex h-16 items-center justify-between">
                         <div className="flex items-center">
-                            <div className="bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-xl font-bold text-transparent">
-                                TBC ACA
-                            </div>
+                            <Link href="/">
+                                <div className="bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-xl font-bold text-transparent">
+                                    TBC ACA
+                                </div>
+                            </Link>
                         </div>
                         <div className="flex items-center space-x-4">
-                            
                             <div className="hidden sm:ms-6 sm:flex sm:items-center">
                                 <div className="relative ms-3">
                                     <Dropdown>
@@ -161,7 +162,6 @@ const PhotoFeed: React.FC<PhotoFeedProps> = ({ initialPhotos = [] }) => {
                                             </Dropdown.Link>
                                             <Dropdown.Link
                                                 href={route('dashboard')}
-                                                
                                                 as="button"
                                             >
                                                 panel
@@ -173,7 +173,6 @@ const PhotoFeed: React.FC<PhotoFeedProps> = ({ initialPhotos = [] }) => {
                                             >
                                                 Log Out
                                             </Dropdown.Link>
-                                            
                                         </Dropdown.Content>
                                     </Dropdown>
                                 </div>
