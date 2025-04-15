@@ -21,7 +21,7 @@ export default function Authenticated({
                     <div className="flex h-16 justify-between">
                         <div className="flex">
                             <div className="flex shrink-0 items-center">
-                                <Link href="/">
+                                <Link href="/guest">
                                     <a
                                         href="#"
                                         className="flex w-full items-center justify-between"

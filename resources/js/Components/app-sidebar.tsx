@@ -46,14 +46,10 @@ const data = {
       url: "/admin/dashboard",
       icon: LayoutDashboardIcon,
     },
+
     {
       title: "Images",
       url: "/admin/images",
-      icon: Images,
-    },
-    {
-      title: "Images",
-      url: "/admin/users",
       icon: Images,
     },
     

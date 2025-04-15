@@ -53,7 +53,7 @@ export default function DetailPhoto({ id }: { id: number }) {
                 
                 // Redirect jika unauthorized
                 if (err instanceof Error && err.message.includes('tidak memiliki akses')) {
-                    router.get('/dashboard');
+                    router.get('/guest/panel');
                 }
             } finally {
                 setLoading(false);
@@ -151,7 +151,7 @@ export default function DetailPhoto({ id }: { id: number }) {
             }
             
             alert('Photo deleted successfully');
-            window.location.href = '/dashboard';
+            window.location.href = '/guest/panel';
             
         } catch (error) {
             console.error('Delete error:', error);
