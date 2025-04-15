@@ -20,7 +20,6 @@ export default function Authenticated({
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between">
                         <div className="flex">
-                            
                             <div className="flex shrink-0 items-center">
                                 <Link href="/">
                                     <a
@@ -39,7 +38,7 @@ export default function Authenticated({
                                     href={route('dashboard')}
                                     active={route().current('dashboard')}
                                 >
-                                    Dashboard
+                                    Images
                                 </NavLink>
                             </div>
                         </div>
@@ -76,6 +75,12 @@ export default function Authenticated({
                                             href={route('profile.edit')}
                                         >
                                             Profile
+                                        </Dropdown.Link>
+                                        <Dropdown.Link
+                                            href={route('dashboard')}
+                                            as="button"
+                                        >
+                                            Panel
                                         </Dropdown.Link>
                                         <Dropdown.Link
                                             href={route('logout')}
