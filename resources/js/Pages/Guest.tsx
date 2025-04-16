@@ -196,7 +196,7 @@ const PhotoFeed: React.FC<PhotoFeedProps> = ({ initialPhotos = [] }) => {
                 ) : (
                     <div className="space-y-6">
                         {photos.map((photo) => (
-                            <div
+                        <div
                                 key={photo.id}
                                 className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow"
                             >
