@@ -40,14 +40,14 @@ export default function UserDetail({ user: initialUser }: UserDetailProps) {
     });
 
     // Show flash messages
-    useEffect(() => {
-        if (flash?.success) {
-            toast.success(flash.success);
-        }
-        if (flash?.error) {
-            toast.error(flash.error);
-        }
-    }, [flash]);
+    // useEffect(() => {
+    //     if (flash?.success) {
+    //         toast.success(flash.success);
+    //     }
+    //     if (flash?.error) {
+    //         toast.error(flash.error);
+    //     }
+    // }, [flash]);
 
     useEffect(() => {
         const dirty =

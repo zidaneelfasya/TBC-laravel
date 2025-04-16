@@ -1,24 +1,34 @@
 import { Camera, Check, Upload, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 
+interface FormState {
+    description: string;
+    file: File | null;
+    preview: string | null;
+    originalName: string;
+    size: number;
+    mimeType: string;
+    userId: number;
+}
+
 export default function PhotoUploadForm() {
-    const [form, setForm] = useState({
+    const [form, setForm] = useState<FormState>({
         description: '',
         file: null,
         preview: null,
         originalName: '',
         size: 0,
         mimeType: '',
-        userId: 1, // Assuming user_id is from auth context in a real app
+        userId: 1,
     });
 
     const [isDragging, setIsDragging] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadSuccess, setUploadSuccess] = useState(false);
 
-    const fileInputRef = useRef(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleDragOver = (e) => {
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         setIsDragging(true);
     };
@@ -27,7 +37,7 @@ export default function PhotoUploadForm() {
         setIsDragging(false);
     };
 
-    const handleDrop = (e) => {
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         setIsDragging(false);
 
@@ -36,7 +46,7 @@ export default function PhotoUploadForm() {
         }
     };
 
-    const handleFileSelect = (file) => {
+    const handleFileSelect = (file: File) => {
         if (!file) return;
 
         // Create a preview URL
@@ -52,7 +62,7 @@ export default function PhotoUploadForm() {
         });
     };
 
-    const handleFileInputChange = (e) => {
+    const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             handleFileSelect(e.target.files[0]);
         }
@@ -85,7 +95,7 @@ export default function PhotoUploadForm() {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!form.file) {
@@ -104,10 +114,9 @@ export default function PhotoUploadForm() {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
-                    // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 },
                 body: formData,
-                credentials: 'include', // Untuk mengirim cookie/session
+                credentials: 'include',
             });
 
             if (!response.ok) {
@@ -124,7 +133,8 @@ export default function PhotoUploadForm() {
             setForm({ ...form, description: '' });
         } catch (error) {
             console.error('Upload error:', error);
-            alert('Terjadi kesalahan saat mengunggah gambar: ' + error.message);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            alert('Terjadi kesalahan saat mengunggah gambar: ' + errorMessage);
         } finally {
             setIsUploading(false);
             window.location.href = '/admin/images';
@@ -214,7 +224,7 @@ export default function PhotoUploadForm() {
                         <textarea
                             id="description"
                             className="w-full resize-none rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            rows="3"
+                            rows={3}
                             placeholder="Tambahkan deskripsi gambar (opsional)"
                             value={form.description}
                             onChange={(e) =>

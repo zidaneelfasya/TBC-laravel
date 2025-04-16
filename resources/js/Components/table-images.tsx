@@ -270,14 +270,16 @@ const handleDownload = async (photo: Photo) => {
 //     },
 // ];
 
-function FileIcon({ type }: { type: any }) {
-    const iconMap = {
-        'image/jpeg': <ImageIcon className="h-5 w-5" />,
-        'image/png': <ImageIcon className="h-5 w-5" />,
-        'image/gif': <GiftIcon className="h-5 w-5" />,
+function FileIcon({ type, className }: { type: string; className?: string }) {
+    const iconMap: Record<string, JSX.Element> = {
+        'image/jpeg': <ImageIcon className={className} />,
+        'image/png': <ImageIcon className={className} />,
+        'image/gif': <GiftIcon className={className} />,
         // Add more mime types as needed
     };
-    return iconMap[type] || <FileIcon className="h-5 w-5" />;
+    
+    // Return the icon if found, otherwise return a default file icon
+    return iconMap[type] || <ImageIcon className={className} />;
 }
 
 function formatFileSize(bytes: number) {

@@ -1,7 +1,7 @@
 import { SidebarInset, SidebarProvider } from "@/Components/ui/sidebar"
 import { AppSidebar } from "@/Components/app-sidebar"
 import { SiteHeader } from "@/Components/site-header"
-import { ErrorOverlay } from "@/Components/error-overlay"
+// import { ErrorOverlay } from "@/Components/error-overlay"
 import { Toaster } from "sonner"
 
 interface AppLayoutProps {
@@ -23,7 +23,7 @@ export default function AdminLayout({ children }: AppLayoutProps) {
           </div>
         </div>
       </SidebarInset>
-      <ErrorOverlay />
+      {/* <ErrorOverlay /> */}
     </SidebarProvider>
   )
 }

@@ -5,10 +5,13 @@ import AdminLayout from '../AdminLayout';
 
 
 interface User {
-    // Define the properties of the user object here
     id: number;
     name: string;
     email: string;
+    role: string;
+    created_at: string;
+    updated_at: string;
+    email_verified_at: string | null;
 }
 
 export default function Show({ user }: { user: User }) {

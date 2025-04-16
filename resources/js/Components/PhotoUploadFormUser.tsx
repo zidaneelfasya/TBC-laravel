@@ -1,24 +1,34 @@
 import { Camera, Check, Upload, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 
+interface FormState {
+    description: string;
+    file: File | null;
+    preview: string | null;
+    originalName: string;
+    size: number;
+    mimeType: string;
+    userId: number;
+}
+
 export default function PhotoUploadForm() {
-    const [form, setForm] = useState({
+    const [form, setForm] = useState<FormState>({
         description: '',
         file: null,
         preview: null,
         originalName: '',
         size: 0,
         mimeType: '',
-        userId: 1, // Assuming user_id is from auth context in a real app
+        userId: 1,
     });
 
-    const [isDragging, setIsDragging] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
-    const [uploadSuccess, setUploadSuccess] = useState(false);
+    const [isDragging, setIsDragging] = useState<boolean>(false);
+    const [isUploading, setIsUploading] = useState<boolean>(false);
+    const [uploadSuccess, setUploadSuccess] = useState<boolean>(false);
 
-    const fileInputRef = useRef(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleDragOver = (e) => {
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         setIsDragging(true);
     };
@@ -27,7 +37,7 @@ export default function PhotoUploadForm() {
         setIsDragging(false);
     };
 
-    const handleDrop = (e) => {
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         setIsDragging(false);
 
@@ -36,10 +46,9 @@ export default function PhotoUploadForm() {
         }
     };
 
-    const handleFileSelect = (file) => {
+    const handleFileSelect = (file: File) => {
         if (!file) return;
 
-        // Create a preview URL
         const previewUrl = URL.createObjectURL(file);
 
         setForm({
@@ -52,7 +61,7 @@ export default function PhotoUploadForm() {
         });
     };
 
-    const handleFileInputChange = (e) => {
+    const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             handleFileSelect(e.target.files[0]);
         }
@@ -77,7 +86,7 @@ export default function PhotoUploadForm() {
         }
     };
 
-    const formatFileSize = (bytes: number) => {
+    const formatFileSize = (bytes: number): string => {
         if (bytes === 0) return '0 Bytes';
         const k = 1024;
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -85,7 +94,7 @@ export default function PhotoUploadForm() {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!form.file) {
@@ -101,17 +110,16 @@ export default function PhotoUploadForm() {
             formData.append('description', form.description);
 
             const response = await fetch('/api/photos', {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            },
-            body: formData,
-            credentials: 'include', // Untuk mengirim cookie/session
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                },
+                body: formData,
+                credentials: 'include',
             });
 
             if (!response.ok) {
-            throw new Error('Upload failed');
+                throw new Error('Upload failed');
             }
 
             const data = await response.json();
@@ -119,18 +127,15 @@ export default function PhotoUploadForm() {
             setUploadSuccess(true);
             setTimeout(() => setUploadSuccess(false), 3000);
 
-            // Reset form setelah upload sukses
             handleRemoveFile();
             setForm({ ...form, description: '' });
-
-            
         } catch (error) {
             console.error('Upload error:', error);
-            alert('Terjadi kesalahan saat mengunggah gambar: ' + error);
+            const errorMessage = error instanceof Error ? error.message : 'Terjadi kesalahan yang tidak diketahui';
+            alert('Terjadi kesalahan saat mengunggah gambar: ' + errorMessage);
         } finally {
             setIsUploading(false);
             window.location.href = '/guest/panel';
-
         }
     };
 
@@ -142,7 +147,6 @@ export default function PhotoUploadForm() {
                 </h2>
 
                 <form onSubmit={handleSubmit}>
-                    {/* File Upload Area */}
                     <div
                         className={`relative mb-6 rounded-lg border-2 border-dashed p-6 text-center transition-colors ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'} ${form.preview ? 'bg-gray-50' : 'bg-white'}`}
                         onDragOver={handleDragOver}
@@ -160,9 +164,7 @@ export default function PhotoUploadForm() {
                                         <button
                                             type="button"
                                             className="font-medium text-blue-500 hover:text-blue-700"
-                                            onClick={() =>
-                                                fileInputRef.current?.click()
-                                            }
+                                            onClick={() => fileInputRef.current?.click()}
                                         >
                                             pilih file
                                         </button>
@@ -176,7 +178,7 @@ export default function PhotoUploadForm() {
                             <div className="space-y-4">
                                 <div className="relative mx-auto h-48 w-48">
                                     <img
-                                        src={form.preview}
+                                        src={form.preview as string}
                                         alt="Preview"
                                         className="h-full w-full rounded-lg object-cover shadow-sm"
                                     />
@@ -206,7 +208,6 @@ export default function PhotoUploadForm() {
                         />
                     </div>
 
-                    {/* Description Field */}
                     <div className="mb-6">
                         <label
                             className="mb-1 block text-sm font-medium text-gray-700"
@@ -217,24 +218,18 @@ export default function PhotoUploadForm() {
                         <textarea
                             id="description"
                             className="w-full resize-none rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            rows="3"
+                            rows={3}
                             placeholder="Tambahkan deskripsi gambar (opsional)"
                             value={form.description}
-                            onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    description: e.target.value,
-                                })
-                            }
+                            onChange={(e) => setForm({ ...form, description: e.target.value })}
                         ></textarea>
                     </div>
 
-                    {/* Submit Button */}
                     <div className="flex justify-end">
                         <button
                             type="submit"
                             disabled={isUploading || !form.file}
-                            className={`flex items-center justify-center rounded-md px-4 py-2 font-medium text-white transition-colors ${!form.file || isUploading ? 'cursor-not-allowed bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'} `}
+                            className={`flex items-center justify-center rounded-md px-4 py-2 font-medium text-white transition-colors ${!form.file || isUploading ? 'cursor-not-allowed bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
                         >
                             {isUploading ? (
                                 <>
