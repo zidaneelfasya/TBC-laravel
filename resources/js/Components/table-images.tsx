@@ -422,6 +422,7 @@ export function DataTable({
                 cell: ({ row }) => {
                     return (
                         <div className="flex items-center gap-2">
+                            <img src={`/storage/${row.original.path}`} className='w-6 h-6 rounded' alt="" />
                             <FileIcon type={row.original.mime_type} />
                             <span>{row.original.original_name}</span>
                         </div>

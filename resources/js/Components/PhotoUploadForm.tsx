@@ -114,6 +114,7 @@ export default function PhotoUploadForm() {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
+                    // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                 },
                 body: formData,
                 credentials: 'include',
