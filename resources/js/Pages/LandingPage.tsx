@@ -59,14 +59,16 @@ export default function LandingPage() {
                                 {/* App mockup */}
                                 <div className="flex h-12 items-center justify-center border-b bg-white">
                                     <span className="text-sm font-medium text-gray-800">
-                                        PixelShare
+                                        TBC-ACA
                                     </span>
                                 </div>
                                 <div className="flex h-40 items-center justify-center bg-gray-50">
-                                    <Image
+                                    <img className='h-40 w-full object-cover '
+                                    src="hero-img.png" alt="" />
+                                    {/* <Image
                                         className="text-gray-300"
                                         size={48}
-                                    />
+                                    /> */}
                                 </div>
                                 <div className="bg-white p-3">
                                     <div className="flex items-center space-x-2">
