@@ -93,7 +93,7 @@ function formatDate(dateString: string) {
 }
 
 function RoleBadge({ role }: { role: string }) {
-    const roleColors = {
+    const roleColors: Record<string, string> = {
         admin: 'bg-blue-500',
         user: 'bg-green-500',
         editor: 'bg-purple-500',
