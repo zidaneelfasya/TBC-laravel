@@ -2,7 +2,15 @@ import { Camera, Check, Upload, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 export default function PhotoFormOnly({ id}: { id: number}) {
-    const [form, setForm] = useState({
+    const [form, setForm] = useState<{
+        description: string;
+        file: File | null;
+        preview: string | null;
+        originalName: string;
+        size: number;
+        mimeType: string;
+        userId: number;
+    }>({
         description: '',
         file: null,
         preview: null,
@@ -16,9 +24,9 @@ export default function PhotoFormOnly({ id}: { id: number}) {
     const [isUploading, setIsUploading] = useState(false);
     const [uploadSuccess, setUploadSuccess] = useState(false);
 
-    const fileInputRef = useRef(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleDragOver = (e) => {
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         setIsDragging(true);
     };
@@ -27,7 +35,7 @@ export default function PhotoFormOnly({ id}: { id: number}) {
         setIsDragging(false);
     };
 
-    const handleDrop = (e) => {
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         setIsDragging(false);
 
@@ -36,7 +44,7 @@ export default function PhotoFormOnly({ id}: { id: number}) {
         }
     };
 
-    const handleFileSelect = (file) => {
+    const handleFileSelect = (file: File) => {
         if (!file) return;
 
         // Create a preview URL
@@ -52,7 +60,7 @@ export default function PhotoFormOnly({ id}: { id: number}) {
         });
     };
 
-    const handleFileInputChange = (e) => {
+    const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             handleFileSelect(e.target.files[0]);
         }
@@ -85,7 +93,7 @@ export default function PhotoFormOnly({ id}: { id: number}) {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
   
       if (!form.file) {
@@ -129,7 +137,7 @@ export default function PhotoFormOnly({ id}: { id: number}) {
 
       } catch (error) {
           console.error('Upload error:', error);
-          alert(`Terjadi kesalahan: ${error.message}`);
+          alert(`Terjadi kesalahan: ${error}`);
       } finally {
           setIsUploading(false);
       }

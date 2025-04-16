@@ -1,5 +1,5 @@
 // import { DataTable } from '@/Components/table-images';
-import { ErrorOverlay } from '@/Components/error-overlay';
+// import { ErrorOverlay } from '@/Components/error-overlay';
 import { DataTable } from '@/Components/table-images-user';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
@@ -16,9 +16,10 @@ type Photo = {
     created_at: string;
     updated_at: string;
     user: {
+        id: number; // Add this
         name: string;
         email: string;
-    }
+    };
 };
 
 export default function Dashboard() {
@@ -61,7 +62,7 @@ export default function Dashboard() {
                         </div>
                     </div>
                 </div>
-                <ErrorOverlay />
+                {/* <ErrorOverlay /> */}
             </AuthenticatedLayout>
         );
     }
@@ -84,7 +85,7 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
-            <ErrorOverlay />
+            {/* <ErrorOverlay /> */}
         </AuthenticatedLayout>
     );
 }
